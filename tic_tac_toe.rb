@@ -28,21 +28,7 @@ class Position
 end
 
 def win(array)
-  return true if array.any? { |line| line.all? { |square| square == 'X' } || line.all? { |square| square == 'O' } }
-
-  false
-end
-
-def find_winner(array)
-  winner = ''
-  return unless win(array)
-
-  if array.any? { |line| line.all? { |square| square == 'X' }}
-    winner = 1
-  else
-    winner = 2
-  end
-  winner
+  array.any? { |line| line.all? { |square| square == 'X' } || line.all? { |square| square == 'O' } } ? true : false
 end
 
 positions = [Position.new(1), Position.new(2), Position.new(3), Position.new(4), Position.new(5), Position.new(6),
@@ -50,8 +36,6 @@ positions = [Position.new(1), Position.new(2), Position.new(3), Position.new(4),
 player_one = Player.new('player one', 'X')
 player_two = Player.new('player two', 'O')
 counter = 0
-winner = ''
-wins = []
 
 puts 'What is player one\'s name?'
 player_one.namer
@@ -61,11 +45,7 @@ puts "\nHello #{player_one.player} and hello #{player_two.player}!\
  #{player_one.player} is playing with X and #{player_two.player} is playing with O. Let's start!\n"
 
 until counter == 9
-  if counter.even?
-    puts "\nIt's #{player_one.player}'s turn"
-  else
-    puts "\nIt's #{player_two.player}'s turn"
-  end
+  puts counter.even? ? "\nIt's #{player_one.player}'s turn" : "\nIt's #{player_two.player}'s turn"
 
   chart = "   #{positions[0].position} | #{positions[1].position} | #{positions[2].position}
   ---+---+---
@@ -97,11 +77,12 @@ until counter == 9
     [positions[2].position, positions[4].position, positions[6].position]
   ]
   if win(wins)
-    if find_winner(wins) == 1
-      winner = player_one.player
-    else
-      winner = player_two.player
-    end
+    winner = counter.odd? ? player_one.player : player_two.player
+    puts chart = "     #{positions[0].position} | #{positions[1].position} | #{positions[2].position}
+    ---+---+---
+     #{positions[3].position} | #{positions[4].position} | #{positions[5].position}
+    ---+---+---
+     #{positions[6].position} | #{positions[7].position} | #{positions[8].position}"
     puts "Game over. #{winner} is the winner."
     break
   end
