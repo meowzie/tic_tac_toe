@@ -77,6 +77,10 @@ until counter == 9
   puts chart
 
   choice = gets.chomp.to_i
+  until (1..9).to_a.include?(choice)
+    puts 'Invalid input. Please try again.'
+    choice = gets.chomp.to_i
+  end
 
   if counter.even?
     positions[choice - 1].update_position('X')
