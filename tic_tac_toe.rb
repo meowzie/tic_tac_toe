@@ -53,6 +53,7 @@ player_one = Player.new('player one', 'X')
 player_two = Player.new('player two', 'O')
 counter = 0
 winner = ''
+wins = []
 
 puts 'What is player one\'s name?'
 player_one.namer
@@ -61,8 +62,7 @@ player_two.namer
 puts "\nHello #{player_one.player} and hello #{player_two.player}!\
  #{player_one.player} is playing with X and #{player_two.player} is playing with O. Let's start!\n"
 
-wins = []
-until win(wins)
+until counter == 9
   if counter.even?
     puts "\nIt's #{player_one.player}'s turn"
   else
@@ -94,10 +94,14 @@ until win(wins)
     [positions[0].position, positions[4].position, positions[8].position],
     [positions[2].position, positions[4].position, positions[6].position]
   ]
+  if win(wins)
+    if find_winner(wins) == 1
+      winner = player_one.player
+    else
+      winner = player_two.player
+    end
+    puts "Game over. #{winner} is the winner."
+    break
+  end
+  puts "It's a draw" if counter == 9
 end
-if find_winner(wins) == 1
-  winner = player_one.player
-else
-  winner = player_two.player
-end
-puts "Game over. #{winner} is the winner."
