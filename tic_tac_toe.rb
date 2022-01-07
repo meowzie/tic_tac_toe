@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'pry-byebug'
-
 # creates players, stores their names and symbols (X vs O) in variables.
 class Player
   attr_accessor :player
