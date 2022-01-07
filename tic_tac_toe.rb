@@ -47,12 +47,11 @@ puts "\nHello #{player_one.player} and hello #{player_two.player}!\
 until counter == 9
   puts counter.even? ? "\nIt's #{player_one.player}'s turn" : "\nIt's #{player_two.player}'s turn"
 
-  chart = "   #{positions[0].position} | #{positions[1].position} | #{positions[2].position}
+  puts "   #{positions[0].position} | #{positions[1].position} | #{positions[2].position}
   ---+---+---
    #{positions[3].position} | #{positions[4].position} | #{positions[5].position}
   ---+---+---
    #{positions[6].position} | #{positions[7].position} | #{positions[8].position}"
-  puts chart
 
   choice = gets.chomp.to_i
   until (1..9).to_a.include?(choice)
@@ -78,7 +77,7 @@ until counter == 9
   ]
   if win(wins)
     winner = counter.odd? ? player_one.player : player_two.player
-    puts chart = "     #{positions[0].position} | #{positions[1].position} | #{positions[2].position}
+    puts "     #{positions[0].position} | #{positions[1].position} | #{positions[2].position}
     ---+---+---
      #{positions[3].position} | #{positions[4].position} | #{positions[5].position}
     ---+---+---
