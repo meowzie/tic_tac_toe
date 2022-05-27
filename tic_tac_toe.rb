@@ -1,89 +1,141 @@
 # frozen_string_literal: true
 
+# creates positions and updates them when they are chosen by the player
+class Position
+  attr_accessor :label, :occupied, :occupier
+
+  def initialize(label)
+    @label = label
+    @occupied = false
+    @occupier = nil
+  end
+
+  def update_position(player)
+    @label = player.symbol
+    @occupied = true
+    @occupier = player.name
+  end
+end
+
 # creates players, stores their names and symbols (X vs O) in variables.
 class Player
-  attr_accessor :player
+  attr_accessor :name, :symbol
 
-  def initialize(player, symbol)
-    @player = player
+  def initialize(name, symbol)
+    @name = name
     @symbol = symbol
+  end
+end
+
+# contains the positions
+class Board
+  attr_accessor :positions, :wins
+
+  def initialize
+    @positions = []
+    9.times { |counter| @positions << Position.new(counter) }
+    @wins = [[positions[0], positions[1], positions[2]],
+             [positions[3], positions[4], positions[5]],
+             [positions[6], positions[7], positions[8]],
+             [positions[0], positions[3], positions[6]],
+             [positions[1], positions[4], positions[7]],
+             [positions[2], positions[5], positions[8]],
+             [positions[0], positions[4], positions[8]],
+             [positions[2], positions[4], positions[6]]]
+  end
+
+  def won?
+    @wins.any? do |line|
+      line.all? { |position| position.label == 'X' } || line.all? do |position|
+        position.label == 'O'
+      end
+    end
+  end
+
+  def x_won?
+    @wins.any? { |line| line.all? { |position| position.label == 'X' } }
+  end
+
+  def put
+    puts <<~HEREDOC
+
+       #{@positions[0].label} | #{@positions[1].label} | #{@positions[2].label}
+      ---+---+---
+       #{@positions[3].label} | #{@positions[4].label} | #{@positions[5].label}
+      ---+---+---
+       #{@positions[6].label} | #{@positions[7].label} | #{@positions[8].label}
+
+    HEREDOC
+  end
+end
+
+# contains top level methods for the entire game
+class Game
+  def initialize
+    @player1 = nil
+    @player2 = nil
+    @board = Board.new
+    @counter = 0
+    @is_up = @player1
+    @winner = nil
   end
 
   def namer
-    @player = gets.chomp.capitalize
-  end
-end
-
-# creates positions and updates them when they are chosen by the player
-class Position
-  attr_accessor :position
-
-  def initialize(position)
-    @position = position
+    puts "What is player one's name?"
+    @player1 = Player.new(gets.chomp.capitalize, 'X')
+    puts "What is player two's name?"
+    @player2 = Player.new(gets.chomp.capitalize, 'O')
+    puts "\nGreat! #{@player1.name} is playing with #{@player1.symbol}, and #{@player2.name} is playing with #{@player2.symbol}"
+    puts "Let's go!"
   end
 
-  def update_position(symbol)
-    @position = symbol
-  end
-end
-
-def win(array)
-  array.any? { |line| line.all? { |square| square == 'X' } || line.all? { |square| square == 'O' } } ? true : false
-end
-
-positions = [Position.new(1), Position.new(2), Position.new(3), Position.new(4), Position.new(5), Position.new(6),
-             Position.new(7), Position.new(8), Position.new(9)]
-player_one = Player.new('player one', 'X')
-player_two = Player.new('player two', 'O')
-counter = 0
-
-puts 'What is player one\'s name?'
-player_one.namer
-puts 'And what is player two\'s name?'
-player_two.namer
-puts "\nHello #{player_one.player} and hello #{player_two.player}!\
- #{player_one.player} is playing with X and #{player_two.player} is playing with O. Let's start!\n"
-
-until counter == 9
-  puts counter.even? ? "\nIt's #{player_one.player}'s turn" : "\nIt's #{player_two.player}'s turn"
-
-  puts "   #{positions[0].position} | #{positions[1].position} | #{positions[2].position}
-  ---+---+---
-   #{positions[3].position} | #{positions[4].position} | #{positions[5].position}
-  ---+---+---
-   #{positions[6].position} | #{positions[7].position} | #{positions[8].position}"
-
-  choice = gets.chomp.to_i
-  until (1..9).to_a.include?(choice)
-    puts 'Invalid input. Please try again.'
-    choice = gets.chomp.to_i
+  def game_over?
+    @counter >= 9 || @board.won?
   end
 
-  if counter.even?
-    positions[choice - 1].update_position('X')
-  else
-    positions[choice - 1].update_position('O')
+  def looper
+    until game_over?
+      player = @counter.even? ? @player1 : @player2
+      puts "\n#{player.name}'s turn"
+      @board.put
+      choice = choose(gets.chomp)
+      @board.positions[choice].update_position(player)
+      @counter += 1
+    end
   end
-  counter += 1
-  wins = [
-    [positions[0].position, positions[1].position, positions[2].position],
-    [positions[3].position, positions[4].position, positions[5].position],
-    [positions[6].position, positions[7].position, positions[8].position],
-    [positions[0].position, positions[3].position, positions[6].position],
-    [positions[1].position, positions[4].position, positions[7].position],
-    [positions[2].position, positions[5].position, positions[8].position],
-    [positions[0].position, positions[4].position, positions[8].position],
-    [positions[2].position, positions[4].position, positions[6].position]
-  ]
-  if win(wins)
-    winner = counter.odd? ? player_one.player : player_two.player
-    puts "     #{positions[0].position} | #{positions[1].position} | #{positions[2].position}
-    ---+---+---
-     #{positions[3].position} | #{positions[4].position} | #{positions[5].position}
-    ---+---+---
-     #{positions[6].position} | #{positions[7].position} | #{positions[8].position}"
-    puts "Game over. #{winner} is the winner."
-    break
+
+  def valid?(choice)
+    return false unless choice.to_i.to_s == choice
+
+    choice = choice.to_i
+    return false if choice.negative?
+    return false if choice > 8
+
+    occupied = %w[O X]
+    return false if occupied.include?(@board.positions[choice].label)
+
+    true
   end
-  puts "It's a draw" if counter == 9
+
+  def choose(choice)
+    until valid?(choice)
+      puts 'Invalid input. Please enter the number of a free square.'
+      choice = gets.chomp
+    end
+    choice.to_i
+  end
+
+  def conclude
+    winner = @board.x_won? ? @player1 : @player2 if @board.won?
+    @board.put
+    return puts "#{winner.name} won!" if winner
+
+    puts "It's a draw"
+  end
+
+  def play
+    namer
+    looper
+    conclude
+  end
 end
